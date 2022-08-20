@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  nginx2:
+    image: nginx:latest
+    volumes:
+      - ./.docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - ./:/var/www/
+    ports:
+      - "8080:80"
+    container_name: nginx2
+    depends_on:
+      - app
+
+  app:
+    build:
+      context: .
+      dockerfile: .docker/app/Dockerfile
+    volumes:
+      - ./:/var/www/
+    container_name: php2
+    depends_on:
+      - mysql2
+
+  mysql2:
+    image: mysql:8.0.30
+    restart: always
+    volumes:
+      - ./tmp/mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: main
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    container_name: mysql2
